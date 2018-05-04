@@ -1,0 +1,28 @@
+P2 - eth1
+P1 - eth2
+P0 - eth3
+
+
+Port detection algo:
+S0=Scan ports on link status.
+Change eee settings to off
+S1=Scan ports on link status.
+Change eee settings to on
+S2=Scan ports on link status.
+
+If S0==S2 and S1 shows a single port that is down-> that port is the interface.
+In any other case: repeat until failurecount
+
+If any of the other ports are down, we are stuck?
+
+
+Configuration scanning:
+
+Once we know on which port we are, we can lock ourself in a seperate vlan, and start snooping traffic:
+
+For all ports that are not our link port:
+  - select our port as mirror target
+  - select the port as mirror source
+  - sniff traffic for up to 10s?
+  - turn off mirroring
+
