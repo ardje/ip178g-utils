@@ -32,14 +32,14 @@ end
 
 -- Leaky vlan config
 do
-	local leaky=sw:getleaky()
+	local leaky=sw:leaky_get()
 	for k,_ in pairs(leaky) do print("Leaky",k) end
 end
 
 -- Port mirror config
 
 do
-	local mirror=sw:getmirror()
+	local mirror=sw:mirror_get()
 	local rx_ports={}
 	local tx_ports={}
 	for k,_ in pairs(mirror.src_rx) do

@@ -39,7 +39,7 @@ local S_leaky={
 	ARP=1, UNICAST=2, MULTICAST=4
 }
 
-function O:getleaky()
+function O:leaky_get()
 	local leaky={}
 	local d=self.mdio:read{phy=23,reg=19}
 	for k,v in pairs(S_leaky) do
@@ -47,7 +47,7 @@ function O:getleaky()
 	end
 	return leaky
 end
-function O:setleaky(n)
+function O:leaky_set(n)
 	local d=0
 	if #n > 0 then
 		for _,v in ipairs(n) do
@@ -107,7 +107,7 @@ function O:ports_to_field(n)
 end
 
 local S_mirror_mode={ [0]="RX", [1]="TX",[2]="DUAL_RX_TX",[3]="SINGLE_RX_TX" }
-function O:getmirror()
+function O:mirror_get()
 	local mirror={}
 	local d3, d4
 	d3=self.mdio:read{phy=20,reg=3}
@@ -127,7 +127,7 @@ function O:getmirror()
 	return mirror
 end
 
-function O:setmirror(mirror)
+function O:mirror_set(mirror)
 	local d3=0 -- self.mdio:read{phy=20,reg=3}
 	local d4=0 -- self.mdio:read{phy=20,reg=4}
 	local dstphy=self:port_to_phy(type(mirror.dst)=="string" and self:name_to_port(mirror.dst) or mirror.dst)
@@ -157,4 +157,6 @@ function O:setmirror(mirror)
 		self.mdio:write{phy=20,reg=3,data=d4}
 	end
 end
+
+-- function O:vlan_get()
 return C
