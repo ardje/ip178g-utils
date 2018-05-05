@@ -158,5 +158,8 @@ function O:mirror_set(mirror)
 	end
 end
 
--- function O:vlan_get()
+function O:vlan_get()
+	local vlan={}
+	return vlan
+end
 return C
