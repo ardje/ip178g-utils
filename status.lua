@@ -37,22 +37,31 @@ do
 end
 
 -- Port mirror config
+local function ports_to_list(n)
+	local list={}
+	for k,_ in pairs(n) do
+		list[#list+1]=("%s"):format(sw:port_to_name(k))
+	end
+	return(table.concat(list,","))
+end
 
 do
 	local mirror=sw:mirror_get()
-	local rx_ports={}
-	local tx_ports={}
-	for k,_ in pairs(mirror.src_rx) do
-		rx_ports[#rx_ports+1]=sw:port_to_name(k)
-	end
-	for k,_ in pairs(mirror.src_tx) do
-		tx_ports[#tx_ports+1]=sw:port_to_name(k)
-	end
 	print(("Mirror: %s, mode: %s, target port: %s, source rx: {%s}, source tx: {%s}\n"):format(
 		mirror.enabled and "on" or "off",
 		mirror.mode,
 		sw:port_to_name(mirror.dst) or "invalid",
-		table.concat(rx_ports,","),
-		table.concat(tx_ports,",")
+		ports_to_list(mirror.src_rx),
+		ports_to_list(mirror.src_tx)
 	))
 end
+-- [[
+do
+	local vlan=sw:vlans_get()
+	for i,v in ipairs(vlan) do
+		print(("%d: valid: %s, vid: %d, members %s"):format(
+			i,tostring(v.valid),v.vid,ports_to_list(v.members)
+		))
+	end
+end
+-- ]]
