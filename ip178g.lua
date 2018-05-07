@@ -142,12 +142,11 @@ function O:mirror_set(mirror)
 	end
 	print(d3,mode,txports,rxports,dstphy)
 	d3=d3|(mode <<13)|rxports
-	d4=(dstphy<<13)|txports
+	d4=d4|(dstphy<<13)|txports
 	print(d3,d4)
 	--[[
 		If we turn mirror on, first write destination port, before turning it on.
 		If we turn mirror off, first turn it off before setting anything else.
-	
 	-- ]]
 	if mirror.enabled then
 		self.mdio:write{phy=20,reg=4,data=d4}
@@ -158,8 +157,46 @@ function O:mirror_set(mirror)
 	end
 end
 
-function O:vlan_get()
+function O:vlans_get()
 	local vlan={}
+	local valid=self.mdio:read{phy=24,reg=0}
+	for i=1,16 do
+		local field=self.mdio:read{phy=24,reg=(i-1)//2+17}>>8*((i-1)&1)
+		vlan[i]={
+			valid=(valid & 1<<(i-1) ~= 0),
+			vid=self.mdio:read{phy=24,reg=i},
+			members=self:field_to_ports(field),
+		}
+	end
 	return vlan
+end
+function O:vlans_set(vlan)
+	local d = {}
+	local bf={}
+	for i = 1,8 do bf[i] =0 end
+	for i = 1,16 do d[i] =0 end
+	local d0 = 0
+	for i,v in ipairs(vlan) do
+		local valid=v.valid
+		if type(v.valid) == "nil" and #(v.members or {} ) > 0 then valid = true end
+		if valid then 
+			d0=d0|1<<(i-1)
+		end
+		local members=self:ports_to_field(v.members or {})
+		local i_2=(i-1)//2+1
+		d[i]=v.vid
+		bf[i_2]=bf[i_2]| (members<<8*((i-1)&1))
+	end
+	self.mdio:write{phy=24,reg=0,data=0}
+	for i=1,16 do self.mdio:write{phy=24,reg=i,data=d[i]} end
+	for i=1,8 do self.mdio:write{phy=24,reg=i+16,data=bf[i]} end	
+	print(d0)
+	self.mdio:write{phy=24,reg=0,data=d0}
+end
+	
+
+local print=print
+function O.dummy()
+	print"dummy"
 end
 return C
