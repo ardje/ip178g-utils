@@ -26,3 +26,27 @@ For all ports that are not our link port:
   - sniff traffic for up to 10s?
   - turn off mirroring
 
+
+vlan configuration:
+ phy 23:
+0:15 write 1 == VLAN_TABLE_CLR
+0:13 UNVID_MODE 0, discard, 1 flood. Unknown vlan?
+
+1:[15..8] bitfield port: VLAN_CLS 0 -> use tag, 1 -> ignore tag use PVID ("Q" in Q?)
+1:[7...0] bitfield port: TAG_VLAN_EN -> tag vlan enable
+vlan ingress:
+2:13 VLAN_DROP_CFI -> drop packets with 802.1Q EDI bit set 
+
+
+
+phy 24
+vlan nrs:
+phy24.0 VLAN_VALID
+phy24.1..16 vid
+phy24.17..20 members
+
+{ valid=true,vid=...,members={ ....} },
+{ }
+
+
+P0={ pvid=...,vlanfilter=true/false, pbv={..
