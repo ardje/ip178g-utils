@@ -15,7 +15,7 @@ local models={
 		name= { "P0","P1","P2","P3","P4" },
 		phy={ 2 , 3, 4 , 6 , 7 },
 		-- ]]
-		name= { "NC0","NC1","P0","P1","P2","NC3","P3","P4" },
+		name= { "NC0","NC1","P0","P1","P2","NC2","P3","P4" },
 		phy={ 0,1,2 , 3, 4 ,5, 6 , 7 },
 	},
 	ip178g = {
@@ -211,6 +211,24 @@ function O:pbv_get()
 		pbv[i]=self:field_to_ports(d>>shift&0xff)
 	end
 	return pbv
+end
+
+function O:pbv_set(pbv)
+	local d={}
+	for i in ipairs(self.model.name) do
+		d[i]=0
+	end
+	for p,v in pairs(pbv) do
+		if type(p) == "string" then p=self:name_to_port(p) end		
+		if p> 0 and p <= #self.model.name then 
+			local members=self:ports_to_field(v) or 0
+			local reg,shift=self:port_to_offset(p,1)
+			d[reg]=d[reg]|(members<<shift)
+		end
+	end 
+	for i,v in ipairs(d) do
+		self.mdio:write{phy=23,reg=i+14,data=v}
+	end
 end
 
 local print=print
