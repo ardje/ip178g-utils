@@ -37,6 +37,12 @@ vlan configuration:
 vlan ingress:
 2:13 VLAN_DROP_CFI -> drop packets with 802.1Q EDI bit set 
 
+Port based vlans:
+
+pbv:
+23.15..19 : port based vlan allowed egress...
+pbv_set{ P0=allports,P1={"P0","P1"} }
+
 
 
 phy 24
