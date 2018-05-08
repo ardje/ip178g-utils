@@ -61,7 +61,7 @@ do
 	df(output,"mirror",{
 		"enabled=%q",mirror.enabled and "true" or "false",
 		"mode=%q",mirror.mode,
-		"dst=%s",sw:port_to_name(mirror.dst) or "invalid",
+		"dst=%q",sw:port_to_name(mirror.dst) or "invalid",
 		"src_rx={%s}",ports_to_list(mirror.src_rx),
 		"src_tx={%s}",ports_to_list(mirror.src_tx),
 	})
@@ -71,23 +71,23 @@ do
 	local vlan=sw:vlans_get()
 	local items={}
 	local last=0
+	local c={}
 	--[[
 		Cut the list at the valid=0 no members.
 	--]]
 	for i,v in ipairs(vlan) do
-		if count(v.members) > 0 then last=i end
-		print(i,#v.members,v.vid)
+		c[i]=count(v.members)
+		if c[i] > 0 then last=i end
 		if v.valid then last=i end
 	end
-	print(last)
 	if last > 0 then
 		for i=1,last do
 			local v=vlan[i]
 			local valid=""
-			if #v.members>0 and not v.valid then
+			if c[i]>0 and not v.valid then
 				valid="valid=false,"
 			end
-			if #v.members==0 and not v.valid and v.vid==0 then
+			if count(v.members)==0 and not v.valid and v.vid==0 then
 				items[#items+1]="{ }"
 			else
 				items[#items+1]=("{ %svid=%d, members=%s }"):format(
