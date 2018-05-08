@@ -65,3 +65,13 @@ do
 	end
 end
 -- ]]
+
+do
+	local pbv=sw:pbv_get()
+	for i,v in pairs(pbv) do
+		print(("port: %s, members %s"):format(
+			sw:port_to_name(i),
+			ports_to_list(v)
+		))
+	end
+end

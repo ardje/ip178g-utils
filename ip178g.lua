@@ -157,11 +157,16 @@ function O:mirror_set(mirror)
 	end
 end
 
+function O.vlan_to_offset(_,n,j)
+	local i=n-1
+	return (i>>1)+j or 0, 8*(i&1)
+end
 function O:vlans_get()
 	local vlan={}
 	local valid=self.mdio:read{phy=24,reg=0}
 	for i=1,16 do
-		local field=self.mdio:read{phy=24,reg=(i-1)//2+17}>>8*((i-1)&1)
+		local reg,shift=self:vlan_to_offset(i,17)
+		local field=(self.mdio:read{phy=24,reg=reg}>>shift)&0xff
 		vlan[i]={
 			valid=(valid & 1<<(i-1) ~= 0),
 			vid=self.mdio:read{phy=24,reg=i},
@@ -179,7 +184,7 @@ function O:vlans_set(vlan)
 	for i,v in ipairs(vlan) do
 		local valid=v.valid
 		if type(v.valid) == "nil" and #(v.members or {} ) > 0 then valid = true end
-		if valid then 
+		if valid then
 			d0=d0|1<<(i-1)
 		end
 		local members=self:ports_to_field(v.members or {})
@@ -189,11 +194,24 @@ function O:vlans_set(vlan)
 	end
 	self.mdio:write{phy=24,reg=0,data=0}
 	for i=1,16 do self.mdio:write{phy=24,reg=i,data=d[i]} end
-	for i=1,8 do self.mdio:write{phy=24,reg=i+16,data=bf[i]} end	
+	for i=1,8 do self.mdio:write{phy=24,reg=i+16,data=bf[i]} end
 	print(d0)
 	self.mdio:write{phy=24,reg=0,data=d0}
 end
-	
+
+function O:port_to_offset(n,i)
+	local phy=self:port_to_phy(n)
+	return (phy>>1)+i or 0, 8*(phy&1)
+end
+function O:pbv_get()
+	local pbv={}
+	for i,_ in ipairs(self.model.name) do
+		local reg,shift=self:port_to_offset(i,15)
+		local d=self.mdio:read{phy=23,reg=reg}
+		pbv[i]=self:field_to_ports(d>>shift&0xff)
+	end
+	return pbv
+end
 
 local print=print
 function O.dummy()

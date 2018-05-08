@@ -98,3 +98,17 @@ do
 	end
 	dump(output,"vlans",items)
 end
+
+-- Portbased vlan config
+
+do
+	local pbv=sw:pbv_get()
+	local items={}
+	for i,v in pairs(pbv) do
+		items[#items+1]=("%s = %s"):format(
+			sw:port_to_name(i),
+			ports_to_table(v)
+		)
+	end
+	dump(output,"pbv",items)
+end
