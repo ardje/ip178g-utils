@@ -1,11 +1,14 @@
 #!/usr/bin/lua5.3
+--[[
+	Example of how to use ip178g as a lib
+]]
 local MDIO=require"mdio"
 local mdio=MDIO.new{_debug=false}
 local switch=require"ip178g"
 local sw=switch.new{model="ip175g", mdio=mdio}
 
 do
-	local mirror=sw:getmirror()
+	local mirror=sw:mirror_get()
 	local rx_ports={}
 	local tx_ports={}
 	for k,_ in pairs(mirror.src_rx) do
@@ -21,7 +24,7 @@ do
 		table.concat(rx_ports,","),
 		table.concat(tx_ports,",")
 	))
-	sw:setmirror{
+	sw:mirror_set{
 		enabled=false,
 		mode="RX",
 		src_rx={"P0","P1"},
