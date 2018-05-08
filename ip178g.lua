@@ -220,7 +220,7 @@ function O:pbv_set(pbv)
 	end
 	for p,v in pairs(pbv) do
 		if type(p) == "string" then p=self:name_to_port(p) end		
-		if p> 0 and p <= #self.model.name then 
+		if p and p> 0 and p <= #self.model.name then 
 			local members=self:ports_to_field(v) or 0
 			local reg,shift=self:port_to_offset(p,1)
 			d[reg]=d[reg]|(members<<shift)
